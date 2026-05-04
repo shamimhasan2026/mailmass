@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Campaigns Pro | Marketing 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --primary: #2563eb; 
+            --primary-light: #eff6ff;
+            --border: #e2e8f0; 
+            --bg: #f8fafc; 
+            --sidebar-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .sidebar { 
+            width: 85px; height: 100vh; position: fixed; left: 0; top: 0;
+            background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; padding-top: 30px; z-index: 1001;
+        }
+
+        .sidebar-brand { margin-bottom: 50px; color: var(--primary); font-size: 2rem; }
+        .nav-menu { display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center; }
+        .nav-item {
+            position: relative; text-decoration: none; color: #64748b; padding: 12px;
+            border-radius: 14px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .main-content { margin-left: 85px; padding: 40px; }
+
+        .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 24px; transition: 0.3s; }
+        .stat-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .campaign-item { background: white; border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 16px; transition: 0.3s ease; }
+        
+        .status-pill { padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase; }
+        .status-running { background: #dcfce7; color: #15803d; }
+        .status-paused { background: #f1f5f9; color: #64748b; }
+        .status-completed { background: #dbeafe; color: #2563eb; }
+
+        .btn-action { width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: white; color: #64748b; transition: 0.2s; text-decoration: none; }
+        .btn-action:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .btn-launch { background: var(--primary); color: white !important; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 14px; }
+        
+        .track-box { background: #f8fafc; border-radius: 12px; padding: 10px; border: 1px solid var(--border); }
+        .track-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+        .track-val { font-size: 16px; font-weight: 700; }
+
+        .merge-badge { cursor: pointer; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--primary); border: 1px dashed var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="material-icons-round">bolt</span></div>
+    <nav class="nav-menu">
+        <a href="/" class="nav-item" title="Dashboard"><span class="material-icons-round">dashboard</span></a>
+        <a href="/leads" class="nav-item" title="Leads"><span class="material-icons-round">groups</span></a>
+        <a href="/campaigns" class="nav-item active" title="Campaigns"><span class="material-icons-round">send</span></a>
+        <a href="/settings" class="nav-item" title="Settings"><span class="material-icons-round">settings</span></a>
+    </nav>
+</div>
+
+<div class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show rounded-4 shadow-sm mb-4">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold m-0">Campaign Analytics</h2>
+            <p class="text-muted small">Monitor real-time open and click engagement</p>
+        </div>
+        <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#newCampModal">
+            <i class="fas fa-plus-circle me-2"></i>New Campaign
+        </button>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary text-white"><span class="material-icons-round">send</span></div>
+                <div class="text-muted small fw-bold">TOTAL SENT</div>
+                <div class="h3 fw-bold mt-1">{{ campaigns|sum(attribute='sent_count') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-success">
+                <div class="stat-icon bg-success text-white"><span class="material-icons-round">visibility</span></div>
+                <div class="text-muted small fw-bold">TOTAL OPENS</div>
+                <div class="h3 fw-bold mt-1 text-success">{{ campaigns|sum(attribute='open_total') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-info">
+                <div class="stat-icon bg-info text-white"><span class="material-icons-round">ads_click</span></div>
+                <div class="text-muted small fw-bold">TOTAL CLICKS</div>
+                <div class="h3 fw-bold mt-1 text-info">{{ campaigns|sum(attribute='click_total') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning text-white"><span class="material-icons-round">people</span></div>
+                <div class="text-muted small fw-bold">TOTAL LEADS</div>
+                <div class="h3 fw-bold mt-1">{{ campaigns|sum(attribute='total_leads') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="fw-bold mb-4">Recent Campaigns</h5>
+
+    {% for camp in campaigns %}
+    <div class="campaign-item shadow-sm border-start {% if camp.status == 'Running' %}border-success{% endif %}" style="border-left-width: 5px !important;">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <div class="fw-bold text-dark fs-5">{{ camp.name }}</div>
+                <div class="small text-muted mb-2">Subject: {{ camp.subject[:30] }}...</div>
+                <span class="status-pill {% if camp.status == 'Running' %}status-running{% elif camp.status == 'Completed' %}status-completed{% else %}status-paused{% endif %}">
+                    {{ camp.status }}
+                </span>
+            </div>
+
+            <div class="col-md-3">
+                <div class="small text-muted mb-1 fw-bold">Sending Progress ({{ camp.sent_count }}/{{ camp.total_leads }})</div>
+                {% set percent = (camp.sent_count / camp.total_leads * 100) if camp.total_leads > 0 else 0 %}
+                <div class="progress" style="height: 8px; border-radius: 10px; background-color: #e2e8f0;">
+                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: {{ percent }}%"></div>
+                </div>
+                <div class="text-muted mt-2" style="font-size: 11px;">List: <b>{{ camp.lead_list }}</b></div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="row g-2 text-center">
+                    <div class="col-6">
+                        <div class="track-box border-success">
+                            <div class="track-label text-success">Total Opens</div>
+                            <div class="track-val">{{ camp.open_total }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="track-box border-info">
+                            <div class="track-label text-info">Total Clicks</div>
+                            <div class="track-val">{{ camp.click_total }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 text-end">
+                <div class="d-flex gap-2 justify-content-end align-items-center">
+                    {% if camp.status != 'Running' and camp.status != 'Completed' %}
+                        <a href="{{ url_for('launch_campaign', id=camp.id) }}" class="btn-launch shadow-sm">
+                            <i class="fas fa-paper-plane me-1"></i> Launch
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('delete_campaign', id=camp.id) }}" class="btn-action" title="Delete Campaign" onclick="return confirm('Are you sure?')">
+                        <span class="material-icons-round">delete</span>
+                    </a>
+                </div>
+                <div class="small text-muted mt-2">{{ camp.created_at.strftime('%d %b, %H:%M') }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="newCampModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h4 class="fw-bold">🚀 Create New Campaign</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form action="/create_campaign" method="post">
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-7 border-end pe-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Campaign Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="e.g. Winter Sale 2025" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Subject</label>
+                                <div class="d-flex gap-2 mb-2">
+                                    <span class="merge-badge" onclick="insertTag('{first_name}')">{First Name}</span>
+                                    <span class="merge-badge" onclick="insertTag('{company}')">{Company}</span>
+                                </div>
+                                <input type="text" id="emailSubject" name="subject" class="form-control" placeholder="Enter subject line" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Body (HTML Supported)</label>
+                                <textarea name="body" id="emailBody" class="form-control" rows="8" placeholder="Hi {first_name}, ..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Select Lead List</label>
+                                <select name="lead_list" class="form-select" required>
+                                    <option value="">-- Choose a List --</option>
+                                    {% for list_name in lists %}
+                                    <option value="{{ list_name }}">{{ list_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 ps-md-4">
+                            <div class="bg-light p-3 rounded-4 mb-3">
+                                <h6 class="fw-bold mb-3"><span class="material-icons-round fs-6">analytics</span> Tracking Active</h6>
+                                <p class="small text-muted">Open and Click tracking is automatically enabled via Ngrok.</p>
+                                <div class="mb-3">
+                                    <label class="form-label small">Email Signature</label>
+                                    <textarea name="signature" class="form-control" rows="3" placeholder="Regards, Your Name"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow">Create Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function insertTag(tag) {
+        const body = document.getElementById('emailBody');
+        body.value += tag;
+        body.focus();
+    }
+</script>
+</body>
+</html>

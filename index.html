@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Accounts | Pro Dashboard 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --primary: #2563eb; 
+            --primary-hover: #1d4ed8;
+            --border: #e2e8f0; 
+            --bg: #f8fafc; 
+            --text-main: #1e293b;
+            --primary-light: #eff6ff;
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .sidebar {
+            width: 85px; height: 100vh; position: fixed; left: 0; top: 0;
+            background: #ffffff; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; 
+            padding-top: 30px; z-index: 1001;
+        }
+        
+        .sidebar-brand { margin-bottom: 50px; color: var(--primary); font-size: 2rem; }
+        .nav-menu { display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center; }
+        
+        .nav-item {
+            text-decoration: none; color: #64748b; padding: 12px;
+            border-radius: 14px; transition: all 0.3s ease; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .nav-item:hover, .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .main-content { margin-left: 85px; padding: 40px; }
+
+        .table-card {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05);
+        }
+
+        .status-indicator {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;
+        }
+        .status-active { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+
+        .provider-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold;
+        }
+
+        .provider-box {
+            border: 2px solid var(--border);
+            border-radius: 16px; padding: 24px; text-align: center;
+            cursor: pointer; transition: all 0.3s ease;
+            background: #fff;
+        }
+        
+        .provider-box:hover {
+            border-color: var(--primary);
+            background: #f0f7ff; transform: translateY(-4px);
+        }
+
+        #configForm { display: none; }
+        .form-control { border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
+        
+        .action-btn {
+            width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border);
+            background: #fff; display: inline-flex; align-items: center; justify-content: center;
+            transition: 0.2s; color: #64748b; text-decoration: none; margin-left: 5px;
+        }
+        .action-btn:hover { background: #f1f5f9; color: var(--primary); }
+        .btn-delete:hover { background: #fee2e2; color: #dc2626; }
+        .btn-report:hover { background: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="material-icons-round">bolt</span></div>
+    <nav class="nav-menu">
+        <a href="/" class="nav-item active" title="Email Accounts"><span class="material-icons-round">mail</span></a>
+        <a href="/leads" class="nav-item" title="Leads"><span class="material-icons-round">people_alt</span></a>
+        <a href="/campaigns" class="nav-item" title="Campaigns"><span class="material-icons-round">send</span></a>
+        <a href="/settings" class="nav-item" title="Settings"><span class="material-icons-round">settings</span></a>
+        <a href="/logout" class="nav-item" title="Logout"><span class="material-icons-round">logout</span></a>
+    </nav>
+</div>
+
+<div class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show rounded-4 mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold mb-1">Email Infrastructure</h2>
+            <p class="text-muted small mb-0">Connect and monitor your SMTP sending power</p>
+        </div>
+        <button class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm" onclick="openAddModal()">
+            <i class="fas fa-plus me-2"></i>Add Account
+        </button>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light text-muted small">
+                    <tr>
+                        <th class="ps-4 py-3">ACCOUNT DETAILS</th>
+                        <th>STATUS</th>
+                        <th>PROVIDER</th>
+                        <th>DAILY LIMIT</th>
+                        <th class="pe-4 text-end">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acc in accounts %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="provider-icon bg-primary-light text-primary me-3">
+                                    {{ acc.provider[0] if acc.provider else 'S' }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ acc.email }}</div>
+                                    <div class="text-muted extra-small" style="font-size: 11px;">Host: {{ acc.smtp_host }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-indicator status-active"></span>
+                            <span class="small fw-600">Connected</span>
+                        </td>
+                        <td><span class="badge bg-light text-dark border px-3 py-2 rounded-pill">{{ acc.provider }}</span></td>
+                        <td>
+                            <div class="fw-bold">{{ acc.daily_limit }}</div>
+                            <div class="text-muted small">emails/day</div>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <a href="/account_report/{{ acc.id }}" class="action-btn btn-report" title="View Details Report">
+                                <span class="material-icons-round" style="font-size: 18px;">analytics</span>
+                            </a>
+                            <a href="/delete_account/{{ acc.id }}" class="action-btn btn-delete" title="Remove Account" onclick="return confirm('Remove this account?')">
+                                <span class="material-icons-round" style="font-size: 18px;">delete_outline</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-5 text-muted">No SMTP accounts connected. Click "Add Account" to start.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold" id="mTitle">Select Your Provider</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="step1" class="row g-3">
+                    <div class="col-md-4" onclick="openForm('Google')">
+                        <div class="provider-box">
+                            <i class="fab fa-google fs-2 text-danger mb-2"></i>
+                            <h6 class="fw-bold">Gmail/Workspace</h6>
+                            <p class="extra-small text-muted mb-0" style="font-size: 10px;">Requires App Password</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4" onclick="openForm('Microsoft')">
+                        <div class="provider-box">
+                            <i class="fab fa-microsoft fs-2 text-primary mb-2"></i>
+                            <h6 class="fw-bold">Outlook/365</h6>
+                            <p class="extra-small text-muted mb-0" style="font-size: 10px;">SMTP via Office365</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4" onclick="openForm('Custom SMTP')">
+                        <div class="provider-box">
+                            <i class="fas fa-server fs-2 text-secondary mb-2"></i>
+                            <h6 class="fw-bold">Custom SMTP</h6>
+                            <p class="extra-small text-muted mb-0" style="font-size: 10px;">Private Mail Servers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="configForm" method="post" action="/connect_account">
+                    <input type="hidden" name="provider" id="provider">
+                    <button type="button" class="btn btn-link text-decoration-none p-0 mb-4 text-muted small" onclick="goBack()">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Providers
+                    </button>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold mb-2">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="name@company.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold mb-2">App Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••••••••••" required>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <label class="small fw-bold mb-2">SMTP Host</label>
+                            <input type="text" name="smtp_host" id="smtp_host" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold mb-2">Port</label>
+                            <input type="number" name="smtp_port" id="smtp_port" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="bg-light p-3 rounded-3 mb-3">
+                                <label class="small fw-bold mb-2 d-block">Daily Sending Limit</label>
+                                <input type="range" class="form-range" min="50" max="2000" step="50" id="limitRange" oninput="this.nextElementSibling.value = this.value" value="500">
+                                <output class="fw-bold text-primary">500</output> <span class="small text-muted">emails per day</span>
+                                <input type="hidden" name="daily_limit" id="finalLimit" value="500">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-2 py-3 fw-bold rounded-3 shadow">
+                        Verify & Connect Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modal = new bootstrap.Modal(document.getElementById('addModal'));
+    const limitRange = document.getElementById('limitRange');
+    const finalLimit = document.getElementById('finalLimit');
+
+    limitRange.addEventListener('input', (e) => {
+        finalLimit.value = e.target.value;
+    });
+
+    function openAddModal(){ goBack(); modal.show(); }
+
+    function openForm(type){
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('configForm').style.display = 'block';
+        document.getElementById('provider').value = type;
+        document.getElementById('mTitle').innerText = 'Connect ' + type;
+        
+        if(type === 'Google') {
+            document.getElementById('smtp_host').value = 'smtp.gmail.com';
+            document.getElementById('smtp_port').value = 587;
+        } else if(type === 'Microsoft') {
+            document.getElementById('smtp_host').value = 'smtp.office365.com';
+            document.getElementById('smtp_port').value = 587;
+        } else {
+            document.getElementById('smtp_host').value = '';
+            document.getElementById('smtp_port').value = '';
+        }
+    }
+
+    function goBack(){
+        document.getElementById('step1').style.display = 'flex';
+        document.getElementById('configForm').style.display = 'none';
+        document.getElementById('mTitle').innerText = 'Select Your Provider';
+    }
+</script>
+</body>
+</html>

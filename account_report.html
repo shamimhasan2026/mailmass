@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Report | {{ acc.email }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; }
+        .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .health-good { color: #22c55e; }
+        .health-warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center rounded-pill px-3">
+            <span class="material-icons-round me-1" style="font-size: 18px;">arrow_back</span> Back to Dashboard
+        </a>
+        <span class="badge bg-primary px-3 py-2 rounded-pill shadow-sm">Reporting Period: 2025</span>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white border-bottom p-4">
+            <h4 class="fw-bold mb-0">Performance Report: <span class="text-primary">{{ acc.email }}</span></h4>
+            <p class="text-muted small mb-0">Provider: {{ acc.provider }} | Host: {{ acc.smtp_host }}</p>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <span class="material-icons-round text-primary mb-2" style="font-size: 32px;">send</span>
+                        <h6 class="text-muted small fw-bold">TOTAL SENT</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.total_sent }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <span class="material-icons-round text-success mb-2" style="font-size: 32px;">drafts</span>
+                        <h6 class="text-muted small fw-bold">TOTAL OPEN</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.total_open }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <span class="material-icons-round text-info mb-2" style="font-size: 32px;">ads_click</span>
+                        <h6 class="text-muted small fw-bold">TOTAL CLICKS</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.total_click }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <span class="material-icons-round {{ 'health-good' if stats.total_open > 0 else 'health-warning' }} mb-2" style="font-size: 32px;">favorite</span>
+                        <h6 class="text-muted small fw-bold">EMAIL HEALTH</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.email_health }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" style="opacity: 0.1;">
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Campaign Metrics</h5>
+                    <div class="list-group list-group-flush border rounded-4">
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Running Campaigns</span>
+                            <span class="fw-bold text-primary">{{ stats.running_campaigns }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Total Campaigns Processed</span>
+                            <span class="fw-bold">{{ stats.total_campaigns }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Daily Limit Set</span>
+                            <span class="badge bg-light text-dark border">{{ stats.daily_limit }} emails/day</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Health Tracking</h5>
+                    <div class="list-group list-group-flush border rounded-4">
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Bounces (Estimated)</span>
+                            <span class="fw-bold text-danger">{{ stats.total_bounce }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Blocks</span>
+                            <span class="fw-bold text-warning">{{ stats.total_block }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between p-3">
+                            <span>Direct Replies</span>
+                            <span class="fw-bold text-success">{{ stats.total_reply }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-light rounded-3">
+                <p class="small text-muted mb-0">
+                    <i class="fas fa-info-circle me-1"></i> 
+                    <strong>Note:</strong> Bounce এবং Reply ট্র্যাকিং বর্তমানে SMTP লিমিটেশনের কারণে ডিফল্ট ০ দেখাচ্ছে। এটি সক্রিয় করতে ভবিষ্যতে IMAP ইন্টিগ্রেশন প্রয়োজন।
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings | CRM 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --primary-light: #eff6ff; --border: #e2e8f0; --bg: #f8fafc; --sidebar-bg: #ffffff; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #1e293b; margin: 0; }
+        .sidebar { width: 85px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 30px; z-index: 1001; }
+        .sidebar-brand { margin-bottom: 50px; color: var(--primary); font-size: 2rem; }
+        .nav-menu { display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center; }
+        .nav-item { text-decoration: none; color: #64748b; padding: 12px; border-radius: 14px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .nav-item:hover, .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .main-content { margin-left: 85px; padding: 40px; padding-bottom: 100px; }
+        .settings-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+        .form-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #475569; text-transform: uppercase; }
+        .form-control { border-radius: 10px; padding: 12px; border: 1px solid var(--border); background: #fcfdfe; }
+        .save-bar { position: fixed; bottom: 0; left: 85px; right: 0; background: #fff; border-top: 1px solid var(--border); padding: 15px 40px; display: flex; justify-content: flex-end; align-items: center; z-index: 100; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="material-icons-round">bolt</span></div>
+    <nav class="nav-menu">
+        <a href="/" class="nav-item"><span class="material-icons-round">account_balance_wallet</span></a>
+        <a href="/leads" class="nav-item"><span class="material-icons-round">people_alt</span></a>
+        <a href="/campaigns" class="nav-item"><span class="material-icons-round">send_and_archive</span></a>
+        <a href="/settings" class="nav-item active"><span class="material-icons-round">settings</span></a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="mb-5">
+        <h2 class="fw-bold m-0">System Settings</h2>
+        <p class="text-muted">Global configuration for your outreach engine</p>
+    </div>
+
+    <form action="/update_settings" method="post">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="settings-card shadow-sm">
+                    <h5 class="fw-bold mb-4">Sending Intelligence</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Global Daily Limit</label>
+                            <input type="number" name="global_daily_limit" class="form-control" value="{{ settings.global_daily_limit or 500 }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Wait Between Emails (Seconds)</label>
+                            <input type="number" name="global_delay" class="form-control" value="{{ settings.global_delay or 60 }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card shadow-sm">
+                    <h5 class="fw-bold mb-4">Tracking Domain</h5>
+                    <input type="url" name="tracking_domain" class="form-control" value="{{ settings.tracking_domain or '' }}" placeholder="https://track.yourdomain.com">
+                </div>
+            </div>
+        </div>
+
+        <div class="save-bar shadow-lg">
+            <button type="submit" class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow">Save All Settings</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
